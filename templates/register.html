@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Create Account</h2>
+<form method="POST" class="small">
+  {{ form.csrf_token }}
+  <label>Username</label>
+  {{ form.username(size=32) }}
+  {% for error in form.username.errors %}
+    <div class="flash error">{{ error }}</div>
+  {% endfor %}
+  <label>Email</label>
+  {{ form.email(size=32) }}
+  {% for error in form.email.errors %}
+    <div class="flash error">{{ error }}</div>
+  {% endfor %}
+  <label>Password</label>
+  {{ form.password(size=32) }}
+  {% for error in form.password.errors %}
+    <div class="flash error">{{ error }}</div>
+  {% endfor %}
+  <label>Re-enter Password</label>
+  {{ form.confirm_password(size=32) }}
+  {% for error in form.confirm_password.errors %}
+    <div class="flash error">{{ error }}</div>
+  {% endfor %}
+  {{ form.submit(class_="btn") }}
+</form>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="logged">Dashboard</h2>
+
+
+<h3>Add a key/value</h3>
+<form method="POST" action="{{ url_for('add_kv') }}" class="form-large">
+  <label>Key</label>
+  <input type="text" name="key" required>
+  <label>Value (will be hashed)</label>
+  <input type="text" name="value" required>
+  <button class="btn" type="submit">Save</button>
+</form>
+
+<h3>Your key/value pairs (hashed)</h3>
+<table>
+  <thead><tr><th>Key</th><th>Hash</th><th>Created</th></tr></thead>
+  <tbody>
+    {% for row in kvs %}
+      <tr><td>{{ row.k }}</td><td class="mono small">{{ row.v_hash }}</td><td>{{ row.created_at }}</td></tr>
+    {% else %}
+      <tr><td colspan="3"><em>No entries yet.</em></td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

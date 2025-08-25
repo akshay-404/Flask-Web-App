@@ -1,0 +1,151 @@
+:root {
+  --pad: 14px;
+  --radius: 14px;
+}
+
+/* Reset & Base */
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial;
+}
+
+body {
+  margin: 0;
+  background: #f7f7fb;
+  color: #222;
+}
+
+/* Navigation Bar */
+.nav {
+  display: flex;
+  gap: 12px;
+  padding: var(--pad);
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+}
+
+.nav a {
+  text-decoration: none;
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 999px;
+}
+
+.nav a:hover {
+  background: #efefef;
+}
+
+/* Containers */
+.container {
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 0 var(--pad);
+}
+
+/* Forms */
+form {
+  display: grid;
+  gap: 8px;
+  background: white;
+  padding: var(--pad);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .06);
+  max-width: 350px;
+  margin: 0 auto;
+}
+
+form.form-large {
+  max-width: none;
+}
+
+label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 14px;
+  border: none;
+  background: #2e7dff;
+  color: white;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  filter: brightness(0.95);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  background: #fff;
+  border-collapse: collapse;
+  margin-top: 12px;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+th,
+td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+
+/* Utilities */
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
+  word-break: break-all;
+}
+
+.small {
+  font-size: 12px;
+}
+
+/* Flash Messages */
+.flashes {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+.flash {
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  background: #eef;
+}
+
+.flash.error {
+  background: #ffe0e0;
+}
+
+.flash.success {
+  background: #e6ffea;
+}
+
+.flash.warning {
+  background: #fff5cc;
+}
+
+.flash.info {
+  background: #e6f0ff;
+}
+
+h2 {
+  text-align: center;
+  font-size: 2.2rem; /* Increase as desired */
+}

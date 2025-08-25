@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Welcome to a minimal Flask-based Web App</h1>
+<p>
+  AuthApp is a simple and secure authentication system built with 
+  <strong>Python (Flask)</strong>, <strong>AWS RDS</strong>, and 
+  <strong>Apache2</strong>. You can easily create an account, log in, 
+  and manage your personal data with peace of mind.  
+</p>
+
+<p>
+  All user credentials are stored safely in a <strong>hashed format</strong>, 
+  and key–value data is managed efficiently in the cloud database. 
+  This ensures your information is private, encrypted, and protected.
+</p>
+
+{% if not session.get('user_id') %}
+<p>
+  Get started by <strong>creating a new account</strong> or <strong>logging in</strong> to access your 
+  personalized dashboard.
+</p>
+{% else %}
+<p>
+  Get started by <strong>creating a key-value pair</strong> in your personalized dashboard.
+</p>
+{% endif %}
+
+{% endblock %}
