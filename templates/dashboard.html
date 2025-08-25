@@ -19,7 +19,9 @@
     {% for row in kvs %}
       <tr><td>{{ row.k }}</td><td class="mono small">{{ row.v_hash }}</td><td>{{ row.created_at }}</td></tr>
     {% else %}
-      <tr><td colspan="3"><em>No entries yet.</em></td></tr>
+      <tr>
+      <td colspan="3" style="text-align: center;"><em>No entries yet.</em></td>
+      </tr>
     {% endfor %}
   </tbody>
 </table>
