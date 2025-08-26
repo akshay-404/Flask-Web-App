@@ -5,11 +5,14 @@
   <title>FlaskApp</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.ico') }}?v=2">
 </head>
 <body>
   <nav class="nav">
     <a href="{{ url_for('index') }}">Home</a>
+    {% if session.get('user_id') %}
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    {% endif %}
     <span style="margin-left:auto;">
       {% if session.get('user_id') %}
         {% set user = namespace(obj=None) %}
