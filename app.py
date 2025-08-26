@@ -60,14 +60,13 @@ def index():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        db = get_db()
-        if db.query(User).filter((User.username == form.username.data) | (User.email == form.email.data)).first():
+        if db.session.query(User).filter((User.username == form.username.data) | (User.email == form.email.data)).first():
             flash("Username or email already exists", "error")
             return render_template("register.html", form=form)
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
-        db.add(user)
-        db.commit()
+        db.session.add(user)
+        db.session.commit()
         flash("Account created. Please login.", "success")
         return redirect(url_for("login"))
     return render_template("register.html", form=form)
