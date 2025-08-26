@@ -92,6 +92,7 @@ def dashboard():
     if user is None:
         flash("User not found.", "error")
         return redirect(url_for("logout"))
+    db.session.expire_all()
     kvs = db.session.query(UserKV).filter_by(user_id=user.id).all()
     return render_template("dashboard.html", user=user, kvs=kvs)
 
