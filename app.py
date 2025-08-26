@@ -109,5 +109,10 @@ def add_kv():
     flash("Key/Value stored (value hashed)", "success")
     return redirect(url_for("dashboard"))
 
+@app.context_processor
+def inject_db_and_models():
+    from models import User
+    return dict(db=db, models=__import__('models'))
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

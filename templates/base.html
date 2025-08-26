@@ -6,14 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.ico') }}">
-
 </head>
 <body>
   <nav class="nav">
     <a href="{{ url_for('index') }}">Home</a>
     {% if session.get('user_id') %}
-      <a href="{{ url_for('dashboard') }}">Dashboard</a>
-      <a href="{{ url_for('logout') }}">Logout ({{ session.get('username') }})</a>
+      <span style="margin-left:auto;">
+        {% set user = namespace(obj=None) %}
+        {% if not user.obj %}
+          {% set user.obj = db.session.query(models.User).get(session['user_id']) %}
+        {% endif %}
+        <strong>{{ user.obj.username }}</strong>
+        <a href="{{ url_for('logout') }}">Logout</a>
+      </span>
     {% else %}
       <a href="{{ url_for('login') }}">Login</a>
       <a href="{{ url_for('register') }}">Register</a>
