@@ -97,11 +97,6 @@ def logout():
 def dashboard():
     db = get_db()
     user = db.query(User).get(session["user_id"])
-    if user is None:
-        flash("User not found. Please log in again.", "error")
-        session.clear()
-        return redirect(url_for("login"))
-    db.expire_all()
     kvs = db.query(UserKV).filter_by(user_id=user.id).all()
     return render_template("dashboard.html", user=user, kvs=kvs)
 
@@ -117,8 +112,8 @@ def add_kv():
     kv = UserKV(user_id=session["user_id"], k=key, v_hash=argon2.hash(value))
     db.add(kv)
     db.commit()
+    db.expires_all()
     flash("Key/Value stored (value hashed)", "success")
-    db.expire_all()
     return redirect(url_for("dashboard"))
 
 if __name__ == "__main__":
