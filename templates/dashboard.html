@@ -12,7 +12,10 @@
   <button class="btn" type="submit">Save</button>
 </form>
 
-<h3>Your key/value pairs (hashed)</h3>
+<div class="table-heading-row">
+  <h3>Your key/value pairs (hashed)</h3>
+  <a href="{{ url_for('export_kv') }}" class="h3-link">Export key/value pairs (.txt format)</a>
+</div>
 <table>
   <thead><tr><th>Key</th><th>Hash</th><th>Created</th></tr></thead>
   <tbody>
