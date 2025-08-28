@@ -121,51 +121,5 @@ def inject_db_and_models():
     from models import User
     return dict(db=db, models=__import__('models'))
 
-@app.route("/export_kv", methods=["POST"])
-@login_required
-def export_kv():
-    user = db.session.query(User).get(session["user_id"])
-    kvs = db.session.query(UserKV).filter_by(user_id=user.id).all()
-
-    # Step 1: Compile KV into text
-    export_content = "\n".join([f"{kv.k} = {kv.v_hash}" for kv in kvs])
-    content_bytes = export_content.encode("utf-8")
-
-    # Step 2: Hash the content
-    file_hash = hashlib.sha256(content_bytes).hexdigest()
-
-    # Step 3: Generate a base filename (without hash)
-    base_filename = f"{user.username}.txt"
-    s3_key = f"exports/{user.username}.txt"  # fixed key for versioning
-
-    # Step 4: Check latest version in S3
-    try:
-        versions = s3.list_object_versions(Bucket=BUCKET_NAME, Prefix=s3_key)
-        if "Versions" in versions:
-            latest = sorted(versions["Versions"], key=lambda v: v["LastModified"], reverse=True)[0]
-            latest_obj = s3.get_object(Bucket=BUCKET_NAME, Key=s3_key, VersionId=latest["VersionId"])
-            latest_content = latest_obj["Body"].read()
-            latest_hash = hashlib.sha256(latest_content).hexdigest()
-
-            if latest_hash == file_hash:
-                # ✅ Same content → no upload, just return latest
-                return Response(
-                    latest_content,
-                    mimetype="text/plain",
-                    headers={"Content-Disposition": f"attachment;filename={base_filename}"}
-                )
-    except s3.exceptions.NoSuchKey:
-        pass
-
-    # Step 5: Upload new file → S3 versioning keeps history
-    s3.put_object(Bucket=BUCKET_NAME, Key=s3_key, Body=content_bytes)
-
-    # Step 6: Send file to user
-    return Response(
-        content_bytes,
-        mimetype="text/plain",
-        headers={"Content-Disposition": f"attachment;filename={base_filename}"}
-    )
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
