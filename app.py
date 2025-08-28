@@ -7,6 +7,12 @@ from config import Config
 from models import User, UserKV
 from passlib.hash import argon2
 from functools import wraps
+import boto3
+import hashlib
+from datetime import datetime
+from flask import send_file
+import io
+
 
 def create_app():
     app = Flask(__name__)
@@ -116,8 +122,59 @@ def inject_db_and_models():
     return dict(db=db, models=__import__('models'))
 
 @app.route("/export_kv", methods=["POST"])
+@login_required
 def export_kv():
-    ...
+    user = db.session.query(User).get(session["user_id"])
+    if not user:
+        flash("User not found.", "error")
+        return redirect(url_for("logout"))
+
+    # Get KV pairs
+    kvs = db.session.query(UserKV).filter_by(user_id=user.id).all()
+    if not kvs:
+        flash("No key/value pairs to export.", "warning")
+        return redirect(url_for("dashboard"))
+
+    # Build file content
+    lines = [f"{idx}\t{kv.k}\t{kv.v_hash}" for idx, kv in enumerate(kvs)]
+    content = "\n".join(lines)
+
+    # Generate unique filename
+    timestamp = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+    hash_part = hashlib.sha256(content.encode()).hexdigest()[:8]
+    filename = f"{user.username}-{timestamp}-{hash_part}.txt"
+
+    # AWS S3 client
+    s3 = boto3.client("s3")
+    bucket_name = "flaskauthapp-storage"   # 🔹 change if different
+
+    # Check if file exists in S3
+    try:
+        s3.head_object(Bucket=bucket_name, Key=filename)
+        file_exists = True
+    except:
+        file_exists = False
+
+    # Upload if not exists
+    if not file_exists:
+        s3.put_object(
+            Bucket=bucket_name,
+            Key=filename,
+            Body=content.encode("utf-8")
+        )
+        flash(f"File {filename} uploaded to S3.", "success")
+    else:
+        flash(f"File already exists in S3. Skipped upload.", "info")
+
+    # Prepare download to client
+    buffer = io.BytesIO(content.encode("utf-8"))
+    buffer.seek(0)
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="text/plain"
+    )
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
