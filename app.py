@@ -121,5 +121,11 @@ def inject_db_and_models():
     from models import User
     return dict(db=db, models=__import__('models'))
 
+@app.route("/export_kv", methods=["POST"])
+@login_required	
+def export_kv():
+    
+    return redirect(url_for("dashboard"))
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

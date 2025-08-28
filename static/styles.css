@@ -72,6 +72,14 @@ form {
   margin: 0 auto;
 }
 
+form.export {
+  background: none;
+  box-shadow: none;
+  max-width: none;
+  padding: 0;
+  margin: 0;
+}
+
 form.form-large {
   max-width: none;
 }
@@ -91,6 +99,7 @@ input[type="email"] {
 
 /* Buttons */
 .btn {
+  font-weight: bold;
   padding: 10px 14px;
   border: none;
   background: #2e7dff;
@@ -165,3 +174,26 @@ h2 {
   text-align: center;
   font-size: 2.2rem;
 }
+
+.table-heading-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline; /* aligns both h3 and button text at baseline */
+}
+
+.export-btn {
+  all: unset;            /* removes all default button styles */
+  font-size: 1.17em;     /* same as <h3> */
+  font-weight: bold;
+  cursor: pointer;
+  color: inherit;        /* inherit heading color */
+  transition: transform 0.2s ease, color 0.2s ease;
+
+}
+
+.export-btn:hover {
+  color: #2e7dff;        /* hover effect */
+  transform: scale(1.05);
+}
+
+
