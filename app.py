@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, Response
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
@@ -9,10 +9,8 @@ from passlib.hash import argon2
 from functools import wraps
 import boto3
 import hashlib
-from datetime import datetime
 from flask import send_file
 import io
-
 
 def create_app():
     app = Flask(__name__)
@@ -21,6 +19,8 @@ def create_app():
 
 app = create_app()
 db = SQLAlchemy(app)
+s3 = boto3.client("s3")
+BUCKET_NAME = "flaskauthapp-storage"
 
 # Forms
 class RegisterForm(FlaskForm):
@@ -125,55 +125,46 @@ def inject_db_and_models():
 @login_required
 def export_kv():
     user = db.session.query(User).get(session["user_id"])
-    if not user:
-        flash("User not found.", "error")
-        return redirect(url_for("logout"))
-
-    # Get KV pairs
     kvs = db.session.query(UserKV).filter_by(user_id=user.id).all()
-    if not kvs:
-        flash("No key/value pairs to export.", "warning")
-        return redirect(url_for("dashboard"))
 
-    # Build file content
-    lines = [f"{idx}\t{kv.k}\t{kv.v_hash}" for idx, kv in enumerate(kvs)]
-    content = "\n".join(lines)
+    # Step 1: Compile KV into text
+    export_content = "\n".join([f"{kv.k} = {kv.v_hash}" for kv in kvs])
+    content_bytes = export_content.encode("utf-8")
 
-    # Generate unique filename
-    timestamp = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
-    hash_part = hashlib.sha256(content.encode()).hexdigest()[:8]
-    filename = f"{user.username}-{timestamp}-{hash_part}.txt"
+    # Step 2: Hash the content
+    file_hash = hashlib.sha256(content_bytes).hexdigest()
 
-    # AWS S3 client
-    s3 = boto3.client("s3")
-    bucket_name = "flaskauthapp-storage"   # 🔹 change if different
+    # Step 3: Generate a base filename (without hash)
+    base_filename = f"{user.username}.txt"
+    s3_key = f"exports/{user.username}.txt"  # fixed key for versioning
 
-    # Check if file exists in S3
+    # Step 4: Check latest version in S3
     try:
-        s3.head_object(Bucket=bucket_name, Key=filename)
-        file_exists = True
-    except:
-        file_exists = False
+        versions = s3.list_object_versions(Bucket=BUCKET_NAME, Prefix=s3_key)
+        if "Versions" in versions:
+            latest = sorted(versions["Versions"], key=lambda v: v["LastModified"], reverse=True)[0]
+            latest_obj = s3.get_object(Bucket=BUCKET_NAME, Key=s3_key, VersionId=latest["VersionId"])
+            latest_content = latest_obj["Body"].read()
+            latest_hash = hashlib.sha256(latest_content).hexdigest()
 
-    # Upload if not exists
-    if not file_exists:
-        s3.put_object(
-            Bucket=bucket_name,
-            Key=filename,
-            Body=content.encode("utf-8")
-        )
-        flash(f"File {filename} uploaded to S3.", "success")
-    else:
-        flash(f"File already exists in S3. Skipped upload.", "info")
+            if latest_hash == file_hash:
+                # ✅ Same content → no upload, just return latest
+                return Response(
+                    latest_content,
+                    mimetype="text/plain",
+                    headers={"Content-Disposition": f"attachment;filename={base_filename}"}
+                )
+    except s3.exceptions.NoSuchKey:
+        pass
 
-    # Prepare download to client
-    buffer = io.BytesIO(content.encode("utf-8"))
-    buffer.seek(0)
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name=filename,
-        mimetype="text/plain"
+    # Step 5: Upload new file → S3 versioning keeps history
+    s3.put_object(Bucket=BUCKET_NAME, Key=s3_key, Body=content_bytes)
+
+    # Step 6: Send file to user
+    return Response(
+        content_bytes,
+        mimetype="text/plain",
+        headers={"Content-Disposition": f"attachment;filename={base_filename}"}
     )
 
 if __name__ == "__main__":
