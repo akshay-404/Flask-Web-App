@@ -38,6 +38,14 @@ body {
   background: #efefef;
 }
 
+.nav a,
+.nav strong {
+  vertical-align: middle;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
 .nav-right {
   margin-left: auto;
   display: flex;
