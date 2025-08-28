@@ -38,6 +38,19 @@ class LoginForm(FlaskForm):
     password = PasswordField("Password", validators=[DataRequired()])
     submit = SubmitField("Login")
 
+def compute_hash(data: str) -> str:
+    return hashlib.sha256(data.encode()).hexdigest()
+
+def gets3_hash(bucket: str, key: str) -> str | None:
+    try:
+        obj = s3.get_object(Bucket=bucket, Key=key)
+        body = obj["Body"].read().decode("utf-8")
+        return compute_hash(body)
+    except s3.exceptions.NoSuchKey:
+        return None
+    except Exception:
+        return None
+
 def login_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
@@ -124,7 +137,26 @@ def inject_db_and_models():
 @app.route("/export_kv", methods=["POST"])
 @login_required	
 def export_kv():
+    user = db.session.query(User).get(session["user_id"])
+    kvs = db.session.query(UserKV).filter_by(user_id=user.id).all()
+    if not kvs:
+        flash("No key/value pairs to export.", "info")
+        return redirect(url_for("dashboard"))
     
+    content = "\n".join(f"{idx}\t{kv.k}\t{kv.v_hash}" for idx, kv in enumerate(kvs))
+    new_hash = compute_hash(content)
+    s3_key = f"exports/{user.username}.txt"
+    latest_hash = gets3_hash(BUCKET_NAME, s3_key)
+    if new_hash != latest_hash:
+        s3.put_object(
+            Bucket=BUCKET_NAME,
+            Key=s3_key,
+            Body=content.encode("utf-8"),
+            ContentType="text/plain"
+        )
+        flash("✅ Exported and uploaded new file to S3.", "success")
+    else:
+        flash("ℹ️ No changes detected, using existing file.", "info")
     return redirect(url_for("dashboard"))
 
 if __name__ == "__main__":
