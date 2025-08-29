@@ -4,5 +4,3 @@ __pycache__/
 instance/
 .venv/
 .env
-.well-known/
-file-management/
