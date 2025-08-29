@@ -162,7 +162,23 @@ def upload_kv():
 @app.route("/download_kv", methods=["POST"])
 @login_required	
 def download_kv():
-    return redirect(url_for("dashboard"))
+    user = db.session.query(User).get(session["user_id"])
+    s3_key = f"exports/{user.username}.txt"
+    try:
+        s3_response = s3.get_object(Bucket=BUCKET_NAME, Key=s3_key)
+        file_content = s3_response["Body"].read()
+        return send_file(
+            io.BytesIO(file_content),
+            mimetype="text/plain",
+            as_attachment=True,
+            download_name=f"{user.username}.txt"
+        )
+    except s3.exceptions.NoSuchKey:
+        flash("No file found. Try uploading first.", "error")
+        return redirect(url_for("dashboard"))
+    except Exception as e:
+        flash(f"Error downloading file: {str(e)}", "error")
+        return redirect(url_for("dashboard"))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
