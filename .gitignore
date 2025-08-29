@@ -4,3 +4,5 @@ __pycache__/
 instance/
 .venv/
 .env
+file-management/*
+!file-management/s3-manager.py
