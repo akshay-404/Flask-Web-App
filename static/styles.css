@@ -177,14 +177,13 @@ h2 {
 
 .table-heading-row {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline; /* aligns both h3 and button text at baseline */
+  align-items: baseline;
 }
 
 .export-btn {
   all: unset;            /* removes all default button styles */
-  font-size: 1.17em;     /* same as <h3> */
-  font-weight: bold;
+  font-size: 1em;     /* same as <h3> */
+  font-weight: normal;
   cursor: pointer;
   color: inherit;        /* inherit heading color */
   transition: transform 0.2s ease, color 0.2s ease;
@@ -194,6 +193,12 @@ h2 {
 .export-btn:hover {
   color: #2e7dff;        /* hover effect */
   transform: scale(1.05);
+}
+
+.table-heading-actions {
+  margin-left: auto;   /* This pushes the actions to the right */
+  display: flex;
+  gap: 30px;            /* Reasonable space between buttons */
 }
 
 

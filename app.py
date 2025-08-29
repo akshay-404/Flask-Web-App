@@ -134,9 +134,9 @@ def inject_db_and_models():
     from models import User
     return dict(db=db, models=__import__('models'))
 
-@app.route("/export_kv", methods=["POST"])
+@app.route("/upload_kv", methods=["POST"])
 @login_required	
-def export_kv():
+def upload_kv():
     user = db.session.query(User).get(session["user_id"])
     kvs = db.session.query(UserKV).filter_by(user_id=user.id).all()
     if not kvs:
@@ -157,6 +157,11 @@ def export_kv():
         flash("✅ Exported and uploaded new file to S3.", "success")
     else:
         flash("ℹ️ No changes detected, using existing file.", "info")
+    return redirect(url_for("dashboard"))
+
+@app.route("/download_kv", methods=["POST"])
+@login_required	
+def download_kv():
     return redirect(url_for("dashboard"))
 
 if __name__ == "__main__":

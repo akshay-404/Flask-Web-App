@@ -14,9 +14,14 @@
 
 <div class="table-heading-row">
   <h3>Your key/value pairs (hashed)</h3>
-  <form action="{{ url_for('export_kv') }}" method="post" class="export">
-    <button type="submit" class="export-btn">Export key/value pairs (.txt format)</button>
-  </form>
+  <div class="table-heading-actions">
+    <form action="{{ url_for('upload_kv') }}" method="post" class="export">
+      <button type="submit" class="export-btn">Upload</button>
+    </form>
+    <form action="{{ url_for('download_kv') }}" method="post" class="export">
+      <button type="submit" class="export-btn">Download</button>
+    </form>
+  </div>
 </div>
 
 
