@@ -192,7 +192,7 @@ h2 {
 
 .export-btn:hover {
   color: #2e7dff;        /* hover effect */
-  transform: scale(1.05);
+  transform: scale(1.15);
 }
 
 .table-heading-actions {
