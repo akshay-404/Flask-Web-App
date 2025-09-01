@@ -123,6 +123,10 @@ def add_kv():
     if not key or not value:
         flash("Both key and value are required.", "error")
         return redirect(url_for("dashboard"))
+    ex = db.session.query(UserKV).filter_by(user_id=session["user_id"], k=key).first()
+    if ex:
+        flash("Key already exist!", "error")
+        return redirect(url_for("dashboard"))
     kv = UserKV(user_id=session["user_id"], k=key, v_hash=argon2.hash(value))
     db.session.add(kv)
     db.session.commit()
